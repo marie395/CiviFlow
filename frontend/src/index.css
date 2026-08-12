@@ -1,0 +1,39 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Bord perforé façon ticket/tampon administratif - élément signature de l'interface */
+.perforated-edge {
+  position: relative;
+}
+.perforated-edge::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -1px;
+  width: 16px;
+  background-image: radial-gradient(circle at 0 12px, transparent 6px, #fbfaf7 6.5px);
+  background-size: 16px 24px;
+  background-repeat: repeat-y;
+}
+
+.focus-ring:focus-visible {
+  outline: 2px solid #1b2a4a;
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
+}
