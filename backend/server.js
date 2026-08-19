@@ -25,13 +25,38 @@ const app = express();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Middlewares
+// =====================================================
+// CONFIGURATION CORS
+// =====================================================
+
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://civi-flow.vercel.app",
+  "https://civi-flow-52v0xmxiq-rooswell-s-projects.vercel.app",
+];
+
 app.use(
   cors({
-    origin: process.env.CLIENT_URL || "*",
+    origin: (origin, callback) => {
+      // Autoriser les requêtes sans origine
+      // (Postman, requêtes serveur à serveur, etc.)
+      if (!origin) {
+        return callback(null, true);
+      }
+
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+
+      return callback(new Error(`Origine non autorisée par CORS : ${origin}`));
+    },
     credentials: true,
   })
 );
+
+// =====================================================
+// MIDDLEWARES
+// =====================================================
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -41,7 +66,10 @@ if (process.env.NODE_ENV !== "production") {
   app.use(morgan("dev"));
 }
 
-// Limitation des requêtes API
+// =====================================================
+// LIMITATION DES REQUÊTES API
+// =====================================================
+
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 300,
@@ -51,7 +79,10 @@ const limiter = rateLimit({
 
 app.use("/api", limiter);
 
-// Dossier des fichiers uploadés
+// =====================================================
+// FICHIERS UPLOADÉS
+// =====================================================
+
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // =====================================================
@@ -110,20 +141,23 @@ app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;
 
-// Connexion à MongoDB puis démarrage du serveur
 const startServer = async () => {
   try {
     await connectDB();
 
     app.listen(PORT, () => {
       console.log(
-        `🚀 Serveur démarré sur le port ${PORT} (${
-          process.env.NODE_ENV || "development"
-        })`
+        `🚀 Serveur démarré sur le port ${
+          PORT
+        } (${process.env.NODE_ENV || "development"})`
       );
     });
   } catch (error) {
-    console.error("❌ Impossible de démarrer le serveur :", error.message);
+    console.error(
+      "❌ Impossible de démarrer le serveur :",
+      error.message
+    );
+
     process.exit(1);
   }
 };
